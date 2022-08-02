@@ -11,11 +11,10 @@ _dash_comm = Comm(target_name='jupyter_dash')
 def _send_jupyter_config_comm_request():
     # If running in an ipython kernel,
     # request that the front end extension send us the notebook server base URL
-    if IPython.get_ipython() is not None:
-        if _dash_comm.kernel is not None:
-            _dash_comm.send({
-                'type': 'base_url_request'
-            })
+    if IPython.get_ipython() is not None and _dash_comm.kernel is not None:
+        _dash_comm.send({
+            'type': 'base_url_request'
+        })
 
 
 @_dash_comm.on_msg

@@ -25,8 +25,7 @@ def get_labextension_version():
     with open(package_json, 'rt') as f:
         package_data = json.load(f)
 
-    labextension_version = package_data['version']
-    return labextension_version
+    return package_data['version']
 
 
 def js_prerelease(command):
@@ -85,9 +84,10 @@ class BuildLabextension(Command):
             cwd=in_labextension_dir,
         )
         check_call(
-            ['jlpm', "pack", "--filename", dist_path + "/" + filename],
+            ['jlpm', "pack", "--filename", f"{dist_path}/{filename}"],
             cwd=in_labextension_dir,
         )
+
 
         # Copy README to extension directory so npm finds it
         shutil.copy(

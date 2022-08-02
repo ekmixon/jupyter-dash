@@ -116,14 +116,14 @@ class JupyterDash(dash.Dash):
                 JupyterDash.default_server_url is None):
             JupyterDash.default_server_url = _jupyter_config['server_url']
 
-        self._input_pathname_prefix = kwargs.get('requests_pathname_prefix', None)
+        self._input_pathname_prefix = kwargs.get('requests_pathname_prefix')
 
         # Infer server_url
         if server_url is None:
             domain_base = os.environ.get('DASH_DOMAIN_BASE', None)
             if domain_base:
                 # Dash Enterprise sets DASH_DOMAIN_BASE environment variable
-                server_url = 'https://' + domain_base
+                server_url = f'https://{domain_base}'
         elif JupyterDash._in_colab:
             warnings.warn("The server_url argument is ignored when running in Colab")
             server_url = None
@@ -131,7 +131,7 @@ class JupyterDash(dash.Dash):
         self.server_url = server_url
 
         # Register route to shut down server
-        @self.server.route('/_shutdown_' + JupyterDash._token, methods=['GET'])
+        @self.server.route(f'/_shutdown_{JupyterDash._token}', methods=['GET'])
         def shutdown():
             func = request.environ.get('werkzeug.server.shutdown')
             if func is None:
@@ -140,7 +140,7 @@ class JupyterDash(dash.Dash):
             return 'Server shutting down...'
 
         # Register route that we can use to poll to see when server is running
-        @self.server.route('/_alive_' + JupyterDash._token, methods=['GET'])
+        @self.server.route(f'/_alive_{JupyterDash._token}', methods=['GET'])
         def alive():
             return 'Alive'
 
@@ -420,12 +420,7 @@ class JupyterDash(dash.Dash):
             pass
 
 
-def _custom_formatargvalues(
-        args, varargs, varkw, locals,
-        formatarg=str,
-        formatvarargs=lambda name: '*' + name,
-        formatvarkw=lambda name: '**' + name,
-        formatvalue=lambda value: '=' + repr(value)):
+def _custom_formatargvalues(args, varargs, varkw, locals, formatarg=str, formatvarargs=lambda name: f'*{name}', formatvarkw=lambda name: f'**{name}', formatvalue=lambda value: f'={repr(value)}'):
 
     """Copied from inspect.formatargvalues, modified to place function
     arguments on separate lines"""
